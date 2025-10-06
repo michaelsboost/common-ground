@@ -17,6 +17,10 @@ body {
   color: var(--dark);
 }
 
+.font-brand { 
+  font-family: "DM Serif Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif; 
+}
+
 .couple-font {
   font-family: 'Dancing Script', cursive;
 }
@@ -72,7 +76,6 @@ body {
   border-radius: 4px;
   background: #e9ecef;
   overflow: hidden;
-  margin-top: 1rem;
 }
 
 .progress-fill {
@@ -80,13 +83,6 @@ body {
   background: linear-gradient(to right, var(--primary), var(--accent));
   border-radius: 4px;
   transition: width 0.5s ease;
-}
-
-.category-progress {
-  margin-top: 1rem;
-  padding: 0.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
 }
 
 .category-progress-bar {

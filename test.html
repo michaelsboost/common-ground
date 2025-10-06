@@ -21,7 +21,6 @@
     <link rel="shortcut icon" type="image/x-icon" href="imgs/logo.svg">
     <link rel="icon" type="image/svg+xml" href="imgs/logo.svg" />
     <link rel="apple-touch-icon" href="imgs/logo.svg">
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/picocss/2.0.6/pico.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
   
@@ -29,109 +28,105 @@
   </head>
   <body>
 
-<main class="container p-4" x-data="commonGround()">
+<main class="container grid grid-cols-1 gap-4" x-data="cardGame()">
   <header class="text-center py-4">
-    <h1 class="text-4xl font-bold couple-font text-[#2a86f4]">
+    <h1 class="text-4xl font-bold text-[#2a86f4]">
       <a class="text-current no-underline" href="https://github.com/michaelsboost/common-ground" target="_blank">Common Ground</a>
     </h1>
     <p class="text-lg text-gray-600">Find common ground—one question at a time</p>
   </header>
 
-  <details class="mb-6 bg-white rounded-lg shadow-sm p-4">
+  <details class="bg-white rounded-lg shadow-md p-4">
     <summary class="font-semibold cursor-pointer">How to Play</summary>
-    <p class="mt-3 text-gray-600">
-      Take turns drawing a prompt and answering in one minute or less. 
-      Tap the card to flip. After sharing, tap <strong>Next Card</strong>. 
-      Choose a category or go random. Listen first. Assume good intent.
-    </p>
+    <p class="mt-3 text-gray-600">Take turns drawing cards and answering the questions. Click the card to flip it and reveal the question. After answering, click "Next Card" to continue. You can also choose specific categories if you prefer!</p>
   </details>
 
-  <div class="grid grid-cols-1 md:grid-cols-[repeat(3,1fr)] gap-0 md:gap-4 mx-0 my-8 items-center">
-    <article class="bg-white p-4 text-center rounded-2xl">
+  <div class="grid grid-cols-1 md:grid-cols-[repeat(3,1fr)] gap-0 md:gap-4 items-center">
+    <article class="bg-white p-4 text-center rounded-2xl shadow-md">
       <h4 class="text-[#2a86f4]" x-text="cardsAnswered"></h4>
       <div class="text-sm text-[#6c757d]">Cards Answered</div>
     </article>
-    <article class="bg-white p-4 text-center rounded-2xl">
+    <article class="bg-white p-4 text-center rounded-2xl shadow-md">
       <h4 class="text-[#2a86f4]" x-text="currentCategory"></h4>
       <div class="text-sm text-[#6c757d]">Current Category</div>
     </article>
-    <article class="bg-white p-4 text-center rounded-2xl">
+    <article class="bg-white p-4 text-center rounded-2xl shadow-md">
       <h4 class="text-[#2a86f4]" x-text="`${Math.floor((cardsAnswered / totalCards) * 100)}%`"></h4>
       <div class="text-sm text-[#6c757d]">Progress</div>
     </article>
   </div>
 
-  <div class="progress-bar">
+  <div class="progress-bar shadow-sm">
     <div class="progress-fill" :style="`width: ${(cardsAnswered / totalCards) * 100}%`"></div>
   </div>
 
   <!-- Category Progress -->
-  <div class="category-progress mt-6 p-4">
-    <h3 class="text-center font-semibold mb-4 text-[#2a86f4]">Progress by Category:</h3>
-    <hr>
-    <template x-for="category in categories" :key="category">
-      <div class="mb-2">
-        <div class="flex justify-between text-sm text-[#6c757d]">
-          <span x-text="category"></span>
-          <span x-text="`${getCategoryProgress(category).answered} / ${getCategoryProgress(category).total}`"></span>
-        </div>
-        <div class="category-progress-bar">
-          <div class="category-progress-fill" :style="`width: ${(getCategoryProgress(category).answered / getCategoryProgress(category).total) * 100}%`"></div>
-        </div>
-      </div>
-    </template>
-  </div>
-
-  <!-- Category Selector -->
-  <div class="my-6 text-center">
-    <h3 class="font-semibold mb-6">Choose a category (or random):</h3>
-    <div class="flex flex-col sm:grid sm:grid-cols-5 justify-center gap-2">
+  <details class="bg-white rounded-lg shadow-md p-4">
+    <summary class="font-semibold cursor-pointer">Progress by Category:</summary>
+    <div>
+      <hr class="mb-4">
       <template x-for="category in categories" :key="category">
-        <button @click="selectCategory(category)" class="rounded-full text-sm" :class="{
-                        'text-white border-[#2a86f4] bg-[#2a86f4] ': selectedCategory === category,
-                        'bg-transparent text-gray-700': selectedCategory !== category
-                        }" x-text="category"></button>
+        <div class="mb-2">
+          <div class="flex justify-between text-sm text-[#6c757d]">
+            <a class="cursor-pointer no-underline" @click="selectCategory(category)">
+              <span x-show="selectedCategory === category">👉</span>
+              <span class="border-solid border-0 border-b" :class="{
+                           'text-black font-semibold': selectedCategory === category,
+                           'bg-white text-current': selectedCategory !== category
+                         }" x-text="category"></span>
+              <span x-show="selectedCategory === category">👈</span>
+
+            </a>
+            <span x-text="`${getCategoryProgress(category).answered} / ${getCategoryProgress(category).total}`"></span>
+          </div>
+          <div class="category-progress-bar">
+            <div class="category-progress-fill" :style="`width: ${(getCategoryProgress(category).answered / getCategoryProgress(category).total) * 100}%`"></div>
+          </div>
+        </div>
       </template>
     </div>
-  </div>
-
-  <!-- Card -->
-  <div class="card-container p-4" @click="flipCard()">
-    <div class="card" :class="{ 'flipped': cardFlipped }">
-      <article class="card-front">
-        <div class="text-[4rem] animate-[pulse_2s_infinite] mb-4">
-          <svg class="w-32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-            <path fill="#ffdd67" d="m56.3 33.4l-1.2-18.1l-8.3 5.1c-4.1-.7-5.2-.7-8.4-2.2c-1.9-.9-4.3-.3-5.5.4c-1.8-1.9-13.5.9-14.8 1.5C14.6 19 9.4 15 9.4 15L7.6 35.4l2.4.6c.2.7.8 2.4.8 2.4c-2.2 2.8.4 6.1 2.9 5c-1.1 2.8 1.8 5.4 4.1 3.6c-.3 2.6 2.4 4.5 4.4 2.7c-.9 3.1 2.6 5.4 4.7 2.9c1.5 1 2.9 1.8 4.1 2.2c2.1.9 4.4-1.1 4-3.6c2.4 2.8 6 .1 5.2-3c2.7 2.1 6-1.4 4.3-4.5c3 1.7 5.6-2.9 2.7-5.9z"></path>
-            <g fill="#eba352">
-              <path d="M13.9 36.3c1.5.7 2.5 3 .9 5l-.7.8c-.8 1-1.6 1.3-2.4 1.3c.6.3 1.3.3 2 0c.1-.3.3-.7.6-1l.7-.8c.4-.5.9-.9 1.3-1.1c.8-2.1-.6-4.1-2.4-4.2m11.4 9.9c1.6.4 2.8 2.5 1.6 4.8l-.6.9c-.6 1.1-1.4 1.6-2.2 1.7c1.1.3 2.3-.1 3.1-1.6l.6-.9c1.5-2.8-.4-5.1-2.5-4.9m-7-.8l1.6-2.5c-.1-1.4-1.3-2.6-2.5-2.7c1.5.7 2.5 3 .9 5l-.7.8c-.8 1-1.6 1.3-2.5 1.3c.8.4 1.7.3 2.6-.3c.1-.5.3-1.1.6-1.6m4.3-4.5c1.6.5 2.7 2.7 1.3 4.9l-1.9 3c-.7 1.1-1.5 1.5-2.3 1.5c1 .3 2.3 0 3.2-1.4l1.9-3c1.6-2.6-.2-5.1-2.2-5m13.3 2.5c.1 0 1.3-.2 1.7-.2c-1.5-1.5-3.9-.3-5.3-1.1c1 1.7 3.1 1.3 3.3 1.3l2.4 3.1c2 2.5.4 5.4-1.7 5.7c2.2.7 4.4-1.6 3.7-4.1c-.1-.1-4.1-4.7-4.1-4.7m2.4-5.8s1.5-.3 2.8-.3c-1.5-1.2-3.8-.1-5.3-1.1c.6 1.3 1.9 1.3 2.3 1.4l4.6 5.3c2.1 2.4.6 5.3-1.5 5.8c2.4.7 4.7-2.4 3.2-5.1c-1-.4-6.1-6-6.1-6"></path>
-              <path d="M35.1 49.1c-1.5-1.2-3.6-.3-4.5-.9c.5 1.4 2.4 1.1 2.5 1.1c1.7 2.6-.1 5.3-2.2 5.5c2.1.9 4.4-1.1 4-3.6c-.1-.1-1.5-1.9-1.5-1.9c.2-.1 1.3-.2 1.7-.2m20.1-17.4s-1.7 3.5-8.3 5.4c-.9-1.1-2.8-3.3-5-5.2c1.4-.3 2.1-1.4 3.2-1.6c-.4-.4-1.8-.2-2.9.2c-2 .7-6.6-2.5-6.6-2.5l-3.8.5c-2.7 2.6-8.5 4-8.8 0c-.2-2.8 5.9-4.7 7.8-6.5c2.4-2.3 4.5-5.2 8.4-3.2c3.2 1.6 4.5 1.5 8.9 2.3c1.5.3 2.5 1 3.6 2.5c-.9-2.1-2.2-3-3.8-3.3l7-3.3l.1-1.7l-8.3 4.7c-3.8-.6-5.2-.6-8.3-2.1c-2-1-3.6-.7-4.9.1c-2.4-1.4-3.8-1.1-4.7-.9c-2.8.9-7.3 1-11.3 2.6c.7.2 1.4.4 1.9.4c3.9-1.2 8-1.1 9.9-1.8c.6-.2 1.8-.2 3.1.5c-.8.7-1.5 1.5-2.3 2.3c-1.9 1.8-7.7 4.4-7.3 7.7c.2 1.6 2.4 5.8 9.7 1.1l3.1-.4s5.7 2.7 11 8.9c2.1 2.4.8 5-1.3 5.6c2.7.5 5-3.3 2.4-5.9l6.3-3.4z"></path>
-            </g>
-            <path fill="#3b946f" d="m53.4 16.3l3.3 17.1l-2.7 1.2c-1.4-3.7-3.5-12.6-3-16.9z"></path>
-            <path fill="#eba352" d="M11.1 38c-.5-1.2-.8-2.8-.8-2.8l-2.5-1.7l-.2 1.9l2.2.6c.3 1 .6 1.8 1 2.4z"></path>
-            <path fill="#3b946f" d="m6.1 35.1l5.4-18.7l2.5 1.7c.4 2.8-4.2 15.6-5.9 17.5z"></path>
-            <path fill="#47b892" d="M53.3 16.2c-.8.5 2.1 17.8 3.3 17.3c3.8-1.7 5.5-2.2 5.5-2.2V10.7c-.1 0-2.4 1.7-8.8 5.5M2 9v25.5s1.8.3 4.1.8c1.3.3 6-18.5 5.7-18.8C8.4 14.2 2 9 2 9"></path>
-          </svg>
+  </details>
+  
+  <!-- Card --> 
+  <div>
+    <div class="card-container p-4" @click="flipCard()">
+      <div class="card shadow-md" :class="{ 'flipped': cardFlipped }">
+        <article class="card-front">
+          <div class="text-[4rem] animate-[pulse_2s_infinite] mb-4">
+            <svg class="w-32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+              <path fill="#ffdd67" d="m56.3 33.4l-1.2-18.1l-8.3 5.1c-4.1-.7-5.2-.7-8.4-2.2c-1.9-.9-4.3-.3-5.5.4c-1.8-1.9-13.5.9-14.8 1.5C14.6 19 9.4 15 9.4 15L7.6 35.4l2.4.6c.2.7.8 2.4.8 2.4c-2.2 2.8.4 6.1 2.9 5c-1.1 2.8 1.8 5.4 4.1 3.6c-.3 2.6 2.4 4.5 4.4 2.7c-.9 3.1 2.6 5.4 4.7 2.9c1.5 1 2.9 1.8 4.1 2.2c2.1.9 4.4-1.1 4-3.6c2.4 2.8 6 .1 5.2-3c2.7 2.1 6-1.4 4.3-4.5c3 1.7 5.6-2.9 2.7-5.9z"></path>
+              <g fill="#eba352">
+                <path d="M13.9 36.3c1.5.7 2.5 3 .9 5l-.7.8c-.8 1-1.6 1.3-2.4 1.3c.6.3 1.3.3 2 0c.1-.3.3-.7.6-1l.7-.8c.4-.5.9-.9 1.3-1.1c.8-2.1-.6-4.1-2.4-4.2m11.4 9.9c1.6.4 2.8 2.5 1.6 4.8l-.6.9c-.6 1.1-1.4 1.6-2.2 1.7c1.1.3 2.3-.1 3.1-1.6l.6-.9c1.5-2.8-.4-5.1-2.5-4.9m-7-.8l1.6-2.5c-.1-1.4-1.3-2.6-2.5-2.7c1.5.7 2.5 3 .9 5l-.7.8c-.8 1-1.6 1.3-2.5 1.3c.8.4 1.7.3 2.6-.3c.1-.5.3-1.1.6-1.6m4.3-4.5c1.6.5 2.7 2.7 1.3 4.9l-1.9 3c-.7 1.1-1.5 1.5-2.3 1.5c1 .3 2.3 0 3.2-1.4l1.9-3c1.6-2.6-.2-5.1-2.2-5m13.3 2.5c.1 0 1.3-.2 1.7-.2c-1.5-1.5-3.9-.3-5.3-1.1c1 1.7 3.1 1.3 3.3 1.3l2.4 3.1c2 2.5.4 5.4-1.7 5.7c2.2.7 4.4-1.6 3.7-4.1c-.1-.1-4.1-4.7-4.1-4.7m2.4-5.8s1.5-.3 2.8-.3c-1.5-1.2-3.8-.1-5.3-1.1c.6 1.3 1.9 1.3 2.3 1.4l4.6 5.3c2.1 2.4.6 5.3-1.5 5.8c2.4.7 4.7-2.4 3.2-5.1c-1-.4-6.1-6-6.1-6"></path>
+                <path d="M35.1 49.1c-1.5-1.2-3.6-.3-4.5-.9c.5 1.4 2.4 1.1 2.5 1.1c1.7 2.6-.1 5.3-2.2 5.5c2.1.9 4.4-1.1 4-3.6c-.1-.1-1.5-1.9-1.5-1.9c.2-.1 1.3-.2 1.7-.2m20.1-17.4s-1.7 3.5-8.3 5.4c-.9-1.1-2.8-3.3-5-5.2c1.4-.3 2.1-1.4 3.2-1.6c-.4-.4-1.8-.2-2.9.2c-2 .7-6.6-2.5-6.6-2.5l-3.8.5c-2.7 2.6-8.5 4-8.8 0c-.2-2.8 5.9-4.7 7.8-6.5c2.4-2.3 4.5-5.2 8.4-3.2c3.2 1.6 4.5 1.5 8.9 2.3c1.5.3 2.5 1 3.6 2.5c-.9-2.1-2.2-3-3.8-3.3l7-3.3l.1-1.7l-8.3 4.7c-3.8-.6-5.2-.6-8.3-2.1c-2-1-3.6-.7-4.9.1c-2.4-1.4-3.8-1.1-4.7-.9c-2.8.9-7.3 1-11.3 2.6c.7.2 1.4.4 1.9.4c3.9-1.2 8-1.1 9.9-1.8c.6-.2 1.8-.2 3.1.5c-.8.7-1.5 1.5-2.3 2.3c-1.9 1.8-7.7 4.4-7.3 7.7c.2 1.6 2.4 5.8 9.7 1.1l3.1-.4s5.7 2.7 11 8.9c2.1 2.4.8 5-1.3 5.6c2.7.5 5-3.3 2.4-5.9l6.3-3.4z"></path>
+              </g>
+              <path fill="#3b946f" d="m53.4 16.3l3.3 17.1l-2.7 1.2c-1.4-3.7-3.5-12.6-3-16.9z"></path>
+              <path fill="#eba352" d="M11.1 38c-.5-1.2-.8-2.8-.8-2.8l-2.5-1.7l-.2 1.9l2.2.6c.3 1 .6 1.8 1 2.4z"></path>
+              <path fill="#3b946f" d="m6.1 35.1l5.4-18.7l2.5 1.7c.4 2.8-4.2 15.6-5.9 17.5z"></path>
+              <path fill="#47b892" d="M53.3 16.2c-.8.5 2.1 17.8 3.3 17.3c3.8-1.7 5.5-2.2 5.5-2.2V10.7c-.1 0-2.4 1.7-8.8 5.5M2 9v25.5s1.8.3 4.1.8c1.3.3 6-18.5 5.7-18.8C8.4 14.2 2 9 2 9"></path>
+            </svg>
+          </div>
+          <h2 class="text-white text-2xl font-bold mb-2">Common Ground</h2>
+          <p class="text-gray-300 text-md font-thin">Click to reveal a prompt</p>
+        </article>
+        <div class="card-back">
+          <span class="absolute text-white text-[0.8rem] font-medium px-3 py-1 rounded-full top-3 right-3 bg-[#2a86f4]" x-text="currentCard.category"></span>
+          <h3 class="text-xl font-semibold mb-4" x-text="currentCard.question"></h3>
+          <p class="text-sm text-gray-500">Share your strategy and discuss</p>
         </div>
-        <h2 class="text-white text-2xl font-bold mb-2">Common Ground</h2>
-        <p class="text-gray-300 text-md font-thin">Click to reveal a prompt</p>
-      </article>
-      <div class="card-back">
-        <span class="absolute text-white text-[0.8rem] font-medium px-3 py-1 rounded-full top-3 right-3 bg-[#2a86f4]" x-text="currentCard.category"></span>
-        <h3 class="text-xl font-semibold mb-4" x-text="currentCard.question"></h3>
-        <p class="text-sm text-gray-500">Share your strategy and discuss</p>
       </div>
     </div>
   </div>
 
-  <div class="grid grid-cols-2 gap-4 my-6">
-    <button @click="nextCard()" class="text-white border-[#2a86f4] bg-[#2a86f4]  p-3 rounded-lg font-semibold transition hover:opacity-90">
+  <div class="grid grid-cols-2 gap-4">
+    <button @click="nextCard()" class="text-white border-[#2a86f4] bg-[#2a86f4]  p-3 rounded-lg font-semibold transition hover:opacity-90 shadow-md">
       Next Card
     </button>
-    <button @click="resetGame()" class="bg-gray-200 p-3 rounded-lg font-semibold text-gray-700 transition hover:bg-gray-300">
+    <button @click="resetGame()" class="bg-gray-200 p-3 rounded-lg font-semibold text-gray-700 transition hover:bg-gray-300 shadow-md">
       Reset Game
     </button>
   </div>
 
+  <!-- Share -->
   <details class="my-6 bg-white rounded-lg shadow-sm p-4">
     <summary class="font-semibold cursor-pointer">Share with your friends!</summary>
     <div class="grid grid-cols-1 gap-0 place-items-center">
@@ -146,707 +141,35 @@
     </div>
   </details>
 
-  <footer role="contentinfo" class="py-6 text-center text-gray-500">
+  <footer class="text-center text-gray-500">
     <p class="text-sm flex flex-wrap justify-center items-center gap-2">
-      <span>Made with <span aria-hidden="true">
-        <svg class="w-4 text-red-500 mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="m12 21.35l-1.45-1.32C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5c0 3.77-3.4 6.86-8.55 11.53z"></path></svg>
-      </span> for stronger communities</span>
-      <span class="text-gray-300">•</span>
-      <span>Built by 
-        <a href="https://michaelsboost.com/" target="_blank" rel="noopener noreferrer" class="font-semibold text-gray-600">
+      <span>🤝 <strong>Common Ground</strong> — Find common ground—one question at a time</span>
+      <span>•</span>
+      <span>Built with 
+        <span aria-hidden="true">
+          <svg class="w-4 text-red-500 mb-1 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="m12 21.35-1.45-1.32C5.4 15.36 2 12.27 2 8.5 2 5.41 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.08C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.41 22 8.5c0 3.77-3.4 6.86-8.55 11.53Z"></path></svg>
+        </span> by 
+        <a href="https://michaelsboost.com/" target="_blank" rel="noopener noreferrer" class="font-semibold text-gray-600 hover:text-[#2a86f4]">
           Michael Schwartz
         </a>
       </span>
     </p>
+    <p class="text-sm flex flex-wrap justify-center items-center gap-2">
+      <a href="https://github.com/michaelsboost/common-ground" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-600 hover:text-[#2a86f4]">
+        Source on GitHub
+      </a>
+      <span>•</span>
+      <a href="https://github.com/michaelsboost/common-ground/issues" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-600 hover:text-[#2a86f4]">
+        Report an Issue
+      </a>
+      <span>•</span>
+      <span class="whitespace-nowrap">No tracking — runs in your browser</span>
+    </p>
   </footer>
 </main>
 
-<script>
-function commonGround() {
-  return {
-    cardFlipped: false,
-    cardsAnswered: 0,
-    totalCards: 0,
-    selectedCategory: null,
-    currentCard: { 
-      question: "Click next card to begin", 
-      category: "Getting Started" 
-    },
-    currentCategory: "Getting Started",
-    categories: ["Unity", "Trust", "Care", "Bridge", "Voice", "Action", "Place", "Hope", "Learn", "Joy"],
-    askedQuestions: {}, // Track asked questions by category
-    availableQuestions: {}, // Track available questions by category
-    allAskedQuestions: new Set(), // Track all asked questions across categories for random mode
-
-    // Community-oriented questions from different categories (50 questions each)
-    questions: [
-      {
-        category: "Unity",
-        questions: [
-          "What unites people here despite differences?",
-          "What’s one hope you share with your neighbors?",
-          "How do you show welcome to strangers?",
-          "When did you feel most connected to this place?",
-          "What value do you want our community known for?",
-          "What symbol could represent our unity?",
-          "How can we celebrate wins together?",
-          "What phrase brings people closer?",
-          "What keeps us from unity right now?",
-          "What small act could build trust tomorrow?",
-          "What song feels like a community anthem?",
-          "What meal could bring people together?",
-          "How can sports unite us here?",
-          "What’s a shared challenge we overcame?",
-          "What’s one project we could all join?",
-          "What gesture feels like ‘we’ instead of ‘me’?",
-          "How can festivals strengthen unity?",
-          "What tradition makes you proud of this place?",
-          "When did unity surprise you?",
-          "What’s a small daily ritual of togetherness?",
-          "What’s a quote that inspires unity?",
-          "What color represents unity to you?",
-          "How do we welcome newcomers better?",
-          "What moment of unity do you treasure?",
-          "What group deserves more recognition?",
-          "What language could help connect more people?",
-          "What does respect for differences look like?",
-          "How can art unite us?",
-          "When did you feel part of something bigger?",
-          "What shared value binds this community?",
-          "What’s a unity gesture you’ve seen work?",
-          "What’s a way to cross cultural divides?",
-          "What story of unity would you tell children?",
-          "What role can elders play in unity?",
-          "How can youth lead unity projects?",
-          "What symbol of peace would you adopt here?",
-          "What’s a memory of people standing together?",
-          "What act of kindness felt unifying?",
-          "What tradition of unity from the past should return?",
-          "What’s the best thing about being united?",
-          "How can unity survive conflict?",
-          "What food, music, or dance unites us?",
-          "What festival could we create for unity?",
-          "What gesture crosses all differences?",
-          "How can humor unite us?",
-          "What word in another language means ‘together’?",
-          "What action says ‘you belong’?",
-          "What’s a dream everyone here shares?",
-          "What symbol of unity should we display?",
-          "What’s a unity habit to build daily?",
-          "How do you show unity in tough times?"
-        ]
-      },
-      {
-        category: "Trust",
-        questions: [
-          "When has someone here earned your trust?",
-          "What’s a fair way to rebuild broken trust?",
-          "What promise matters most to keep?",
-          "How can we handle conflict without blame?",
-          "What gesture shows reliability to you?",
-          "When did you trust a stranger and it worked?",
-          "What makes you feel safe in this group?",
-          "What boundary do you need respected?",
-          "How can we be more transparent with each other?",
-          "What does honesty look like in practice?",
-          "What’s a sign you can count on someone?",
-          "When did broken trust teach you something?",
-          "What small act makes you trust faster?",
-          "What weakens trust in communities?",
-          "How do we show consistency as neighbors?",
-          "What makes you hesitate to trust?",
-          "How can leaders earn trust fairly?",
-          "What’s a trust-building activity we could try?",
-          "When has trust surprised you?",
-          "What body language builds trust?",
-          "How can we keep promises as a group?",
-          "What tradition shows reliability here?",
-          "When did you trust and get let down?",
-          "What heals trust after conflict?",
-          "How can sharing food build trust?",
-          "What’s a time someone defended you?",
-          "What’s your personal rule about promises?",
-          "What gesture signals honesty to you?",
-          "What’s an example of collective trust?",
-          "What undermines trust quickly?",
-          "How do apologies rebuild trust?",
-          "What’s a story of trust from your culture?",
-          "What role does respect play in trust?",
-          "What makes trust fragile?",
-          "How can youth practice trust safely?",
-          "What words build trust instantly?",
-          "What tradition passes on reliability?",
-          "What makes trust grow slowly?",
-          "What’s a time forgiveness restored trust?",
-          "What ritual could we create to show trust?",
-          "What behavior signals mistrust?",
-          "How do you show someone they’re trusted?",
-          "What role does listening play in trust?",
-          "What example of trust do you admire?",
-          "What does keeping confidence mean to you?",
-          "What role does fairness play in trust?",
-          "What makes institutions trustworthy?",
-          "What personal quality builds trust fastest?",
-          "How can humor build trust?",
-          "What’s one thing you’d never risk with trust?",
-          "What’s a community promise we should all keep?"
-        ]
-      },
-      {
-        category: "Care",
-        questions: [
-          "What’s a simple way to check in on neighbors?",
-          "Who here could use extra care this week?",
-          "What tradition of care do you remember from childhood?",
-          "What words comfort you when stressed?",
-          "How can we notice unspoken needs?",
-          "What’s one caring act you’ll never forget?",
-          "How can we include isolated neighbors?",
-          "What makes you feel cared for?",
-          "What’s a skill of care you’d like to learn?",
-          "How can we teach kids to care for others?",
-          "What’s a local group that shows true care?",
-          "When did a stranger show you kindness?",
-          "What’s a daily act of care you practice?",
-          "What song or story reminds you of care?",
-          "What foods feel like comfort to share?",
-          "How can we care for nature here?",
-          "What’s a time you felt supported by many?",
-          "What gesture always cheers you up?",
-          "What’s a form of care people overlook?",
-          "When did you feel safe because of others?",
-          "What role does listening play in care?",
-          "How do you show care without words?",
-          "What community event feels like care in action?",
-          "What is self-care you wish more people practiced?",
-          "How can we care for elders better?",
-          "What’s a care tradition worth reviving?",
-          "Who taught you about compassion?",
-          "What’s the best care you’ve received here?",
-          "How can we care for new parents locally?",
-          "What small gift shows care?",
-          "What role do pets play in care?",
-          "When did someone check in at the right time?",
-          "How can we care during emergencies?",
-          "What’s a care role you naturally take?",
-          "What gesture of care should be universal?",
-          "What role does patience play in care?",
-          "When did care heal a conflict?",
-          "What’s a memory of group care you hold dear?",
-          "What’s one way to reduce loneliness here?",
-          "What volunteer role feels like care to you?",
-          "How do you know when to offer help?",
-          "What’s a story of care you’ve witnessed recently?",
-          "What local place feels most caring?",
-          "How can we care for children better?",
-          "What tradition of care do you want to start?",
-          "How can neighbors support each other in winter?",
-          "What gesture feels like home to you?",
-          "What role does touch play in care?",
-          "What makes care feel genuine?",
-          "How can we show care to newcomers?"
-        ]
-      },
-      {
-        category: "Bridge",
-        questions: [
-          "What divides us that we could bridge?",
-          "What’s a respectful way to disagree?",
-          "When did someone change your perspective?",
-          "What’s a shared goal across differences?",
-          "How can we reduce ‘us vs. them’ thinking?",
-          "What words open up dialogue?",
-          "What stereotype do you wish people dropped?",
-          "When did listening change a conflict?",
-          "What tradition brings groups together?",
-          "What’s a bridge activity we could start?",
-          "How can we unite across age groups?",
-          "What value do all cultures share?",
-          "When did you connect with someone unexpected?",
-          "What’s a story that crosses divides?",
-          "How can music or art build bridges?",
-          "What’s a moment you felt unity in diversity?",
-          "What habit creates separation here?",
-          "How can we build empathy daily?",
-          "What gesture makes peace easier?",
-          "What word means common ground to you?",
-          "What’s a small act to bridge generations?",
-          "How can humor cross divides?",
-          "What’s a respectful debate you’ve had?",
-          "What’s a custom that deserves wider sharing?",
-          "When did compromise work well?",
-          "How can we learn from disagreements?",
-          "What signals openness in a hard talk?",
-          "What topic can unite very different people?",
-          "What divides neighbors most, and how to fix?",
-          "What builds trust between groups?",
-          "What tradition crosses religion or culture?",
-          "When did collaboration surprise you?",
-          "What does forgiveness look like in groups?",
-          "How can we avoid echo chambers?",
-          "What symbol means bridging to you?",
-          "What story of peace do you admire?",
-          "What’s a bridge role you can play?",
-          "What helps in talking politics respectfully?",
-          "When did you feel included after being excluded?",
-          "What’s a practice to welcome differences?",
-          "How can neighbors learn each other’s stories?",
-          "What makes dialogue break down?",
-          "What makes dialogue succeed?",
-          "How can we handle misunderstandings kindly?",
-          "What action says ‘we’re together’?",
-          "What divides do kids bridge naturally?",
-          "What’s a project requiring many views?",
-          "When did bridging feel joyful?",
-          "What does community harmony look like?",
-          "What’s the first step to bridge today?"
-        ]
-      },
-      {
-        category: "Voice",
-        questions: [
-          "What issue do you want heard locally?",
-          "How can quieter voices be lifted?",
-          "What makes you feel listened to?",
-          "What meeting style brings out all voices?",
-          "When was your idea valued here?",
-          "What silences people, and how can we fix it?",
-          "How could youth voices matter more?",
-          "What’s the power of storytelling in community?",
-          "What does respectful listening sound like?",
-          "What change would you speak for tomorrow?",
-          "What’s a song that gives people voice?",
-          "When did someone speak up for you?",
-          "What’s a story you’d like to tell?",
-          "What gesture says ‘I hear you’?",
-          "How can we amplify overlooked voices?",
-          "What role do elders’ voices play here?",
-          "What’s a moment when you felt ignored?",
-          "How can technology give us more voice?",
-          "What ritual ensures everyone speaks?",
-          "When did speaking out change something?",
-          "What makes you confident to share?",
-          "How can we honor lived experiences?",
-          "What holds people back from speaking?",
-          "What’s a safe space to practice voice?",
-          "What role do questions play in dialogue?",
-          "When did silence speak louder than words?",
-          "What tradition carries community stories?",
-          "What’s a time your opinion shifted?",
-          "How can we balance many voices?",
-          "What skill helps people be heard?",
-          "What voice from history inspires you?",
-          "What’s a respectful way to challenge ideas?",
-          "What gesture says ‘your voice matters’?",
-          "How can we give space to new leaders?",
-          "What role do protests play in voice?",
-          "When did you feel brave speaking up?",
-          "What’s a method for equal airtime?",
-          "How can we hear kids more?",
-          "What’s a story you’d record for the future?",
-          "What role do artists’ voices play?",
-          "What makes a speaker trustworthy?",
-          "How can listening prevent conflict?",
-          "What’s a time you regretted not speaking?",
-          "What forum gives power to the people?",
-          "What role do questions play in democracy?",
-          "When did voice bring healing?",
-          "What makes a message clear and strong?",
-          "How can we support free expression?",
-          "What moment made you feel seen?",
-          "What should never be silenced?"
-        ]
-      },
-      {
-        category: "Action",
-        questions: [
-          "What small project could start this week?",
-          "What’s one change we could do in one day?",
-          "When did action here inspire you?",
-          "How can we share responsibility fairly?",
-          "What resource do we already have for action?",
-          "What keeps people from acting together?",
-          "What motivates you to step up?",
-          "What tradition of action should we revive?",
-          "What’s a low-cost way to show impact?",
-          "What’s one action we can celebrate soon?",
-          "What skill helps turn talk into action?",
-          "What’s a habit that builds momentum?",
-          "When did collective effort succeed?",
-          "What role does planning play in action?",
-          "What’s an example of leading by doing?",
-          "What makes action fun instead of heavy?",
-          "What barrier stops follow-through?",
-          "What helps you commit to a task?",
-          "What role do volunteers play here?",
-          "What’s a time neighbors acted fast together?",
-          "How can we make action inclusive?",
-          "What motivates you more—goals or deadlines?",
-          "What’s the best action from the past year?",
-          "When did inaction cause regret?",
-          "What role does courage play in action?",
-          "What’s a daily micro-action anyone can try?",
-          "How can we celebrate small wins?",
-          "What makes people stick to commitments?",
-          "What inspires you to take initiative?",
-          "What’s an action worth repeating monthly?",
-          "What role does teamwork play in results?",
-          "When did persistence pay off?",
-          "What helps people overcome procrastination?",
-          "What does accountability look like in action?",
-          "What role does creativity play in solutions?",
-          "When did action heal division?",
-          "What tool or space enables quick action?",
-          "What makes people show up to help?",
-          "What’s a project we could finish in one day?",
-          "How can we balance speed and quality?",
-          "What story of action inspires you most?",
-          "What helps transform ideas into steps?",
-          "What can we do with no budget?",
-          "What motivates kids to act?",
-          "What keeps energy alive in long projects?",
-          "What role do leaders play in action?",
-          "When did neighbors rally for a cause?",
-          "What helps turn mistakes into lessons?",
-          "What’s an action you’d like to start soon?",
-          "What step can we take together today?"
-        ]
-      },
-      {
-        category: "Place",
-        questions: [
-          "What local spot feels like home?",
-          "Where could we gather more often?",
-          "What landmark tells our story?",
-          "What public space needs care?",
-          "What memory ties you to this land?",
-          "Where do different groups naturally mix?",
-          "What place is most welcoming here?",
-          "What corner could become beautiful?",
-          "Where should we plant something together?",
-          "What’s a hidden gem nearby to share?",
-          "What’s your favorite park or green space?",
-          "What building feels like a community anchor?",
-          "Where did you feel safe as a child?",
-          "What spot inspires creativity for you?",
-          "Where can we showcase local art?",
-          "What place could host a community festival?",
-          "Where is history most visible here?",
-          "What’s a safe place for kids?",
-          "Where do people relax together?",
-          "What street feels most alive?",
-          "What’s one space that needs more light?",
-          "Where would you take a visitor first?",
-          "What’s a spot that sparks joy?",
-          "Where have you felt the strongest togetherness?",
-          "What part of town needs more love?",
-          "Where could we create a mural?",
-          "What local place holds deep memories?",
-          "Where could neighbors share meals outdoors?",
-          "What’s a place you avoid, and why?",
-          "Where should we gather in emergencies?",
-          "What spot would make a great market?",
-          "Where does nature feel strongest here?",
-          "What’s a gathering place worth protecting?",
-          "Where can youth safely hang out?",
-          "What place brings back old stories?",
-          "Where could we build a playground?",
-          "What’s the quietest spot around?",
-          "Where is diversity most visible?",
-          "What public place feels underused?",
-          "Where could we create a garden?",
-          "What place makes you proud of home?",
-          "Where can music bring people together?",
-          "What spot could become more inclusive?",
-          "Where should we install more benches?",
-          "What place could connect generations?",
-          "Where do people go for reflection?",
-          "What space should stay open to all?",
-          "What’s a dream place for community events?",
-          "Where could we build common ground?",
-          "What place do you want future kids to love?"
-        ]
-      },
-      {
-        category: "Hope",
-        questions: [
-          "What future do you dream for this place?",
-          "What do you wish for kids growing up here?",
-          "What small hope feels possible soon?",
-          "What big hope would take all of us?",
-          "When have you seen hope restored?",
-          "What’s a hopeful message we could spread?",
-          "How do you stay hopeful in tough times?",
-          "What hope could unite all ages here?",
-          "What’s a story of hope you’ve lived?",
-          "What hope will you pass on to others?",
-          "What symbol represents hope to you?",
-          "When did neighbors give you hope?",
-          "What song fills you with hope?",
-          "What tradition sparks hope in hard times?",
-          "What’s a hope worth repeating aloud daily?",
-          "What helps hope turn into action?",
-          "When did kids inspire your hope?",
-          "What role do stories play in hope?",
-          "What place feels full of hope?",
-          "What hope makes you smile instantly?",
-          "What small act renewed your hope recently?",
-          "What dream should this community chase?",
-          "What role does faith play in hope?",
-          "What makes you hopeful about young people?",
-          "What hope do you have for elders?",
-          "What helps hope survive setbacks?",
-          "What words spark hope in you?",
-          "What tradition carries hope across time?",
-          "What hope feels contagious?",
-          "When has hope spread quickly?",
-          "What’s a hopeful vision for five years from now?",
-          "What hope could bring strangers together?",
-          "What’s the bravest hope you hold?",
-          "What makes people lose hope?",
-          "What restores hope after loss?",
-          "What action shows hope in practice?",
-          "What is the most hopeful story you know?",
-          "What gives you hope about this land?",
-          "What role does laughter play in hope?",
-          "What dream feels within reach?",
-          "What makes hope fragile?",
-          "What makes hope strong?",
-          "What hope would you write on a wall?",
-          "What’s a hope you’ve seen fulfilled?",
-          "What hope should never be forgotten?",
-          "What’s a hope you share with neighbors?",
-          "What picture represents hope here?",
-          "What do you hope to learn soon?",
-          "What hope crosses all boundaries?",
-          "What gives you hope for tomorrow?",
-          "What hope feels urgent today?"
-        ]
-      },
-      {
-        category: "Learn",
-        questions: [
-          "What skill could neighbors trade?",
-          "What lesson did your elders teach you?",
-          "What could we learn from kids here?",
-          "What tradition deserves to be shared?",
-          "What’s a mistake this community learned from?",
-          "What topic should we study together?",
-          "What language or phrase could we all learn?",
-          "What story shaped how you see the world?",
-          "What do newcomers teach us?",
-          "What’s one thing you’d love to teach others?",
-          "When did learning change your perspective?",
-          "What role does failure play in learning?",
-          "What hobby could unite neighbors?",
-          "What’s a cultural practice worth learning?",
-          "What book taught you something lasting?",
-          "What’s a local history more people should know?",
-          "What’s a skill future generations must learn?",
-          "What’s the best lesson from a child?",
-          "What tradition teaches patience?",
-          "What’s something you learned outside school?",
-          "Who in this community is a hidden teacher?",
-          "What’s a recipe worth passing on?",
-          "What plant or place taught you something?",
-          "What does lifelong learning mean to you?",
-          "What’s the best advice you’ve received?",
-          "When did teaching someone teach you more?",
-          "What role do libraries play in learning?",
-          "What lesson comes from nature here?",
-          "What podcast or show taught you something?",
-          "What’s a skill every household should know?",
-          "What role does curiosity play in unity?",
-          "What’s a tradition of mentoring worth reviving?",
-          "What lesson about kindness stayed with you?",
-          "What’s a game that teaches cooperation?",
-          "What mistake taught you the most?",
-          "What story from an elder shaped you?",
-          "What lesson did hard times teach?",
-          "What’s something you’d like to unlearn?",
-          "What lesson crosses all cultures?",
-          "What’s a phrase in another language you love?",
-          "What’s a way to share learning freely?",
-          "When did learning feel joyful?",
-          "What’s the most surprising thing you learned here?",
-          "What role does listening play in learning?",
-          "What lesson could kids teach adults?",
-          "What tradition teaches resilience?",
-          "What’s a lesson you want remembered?",
-          "What tool helps you learn best?",
-          "What skill could we learn as a group?",
-          "What lesson should be passed to newcomers?",
-          "What’s the most important thing to learn next?"
-        ]
-      },
-      {
-        category: "Joy",
-        questions: [
-          "What makes this community laugh?",
-          "What celebration brings us alive?",
-          "What’s a joyful sound in this place?",
-          "What game could everyone play together?",
-          "When did you last see joy spread widely?",
-          "What tradition brings joy across generations?",
-          "How can we create fun for free?",
-          "What small joy do you notice daily?",
-          "What’s a joyful surprise you’ve given?",
-          "How can joy keep us strong in hard times?",
-          "What music fills this place with joy?",
-          "What local food sparks happiness?",
-          "What’s a funny story neighbors share?",
-          "What festival feels most joyful here?",
-          "What gesture spreads instant smiles?",
-          "What makes children light up with joy?",
-          "When did laughter heal a moment?",
-          "What joyful habit could we build?",
-          "What’s a memory of shared laughter?",
-          "What’s a holiday tradition full of joy?",
-          "How can play unite generations?",
-          "What role does dancing play in joy?",
-          "What’s a joke that always works?",
-          "What moment made you laugh until you cried?",
-          "What’s a simple joy in nature?",
-          "What activity brings neighbors together joyfully?",
-          "When did you feel joy in a crowd?",
-          "What joy do pets bring to community?",
-          "What silly tradition would you start?",
-          "What’s a joy you rediscovered recently?",
-          "What colors feel joyful to you?",
-          "What’s a joyful memory in this place?",
-          "What sport or game spreads smiles here?",
-          "What’s a joy worth celebrating yearly?",
-          "What’s a local song of joy?",
-          "When did humor break the tension?",
-          "What’s a random act of joy you’ve seen?",
-          "What gift brought the most laughter?",
-          "What joy do you hope to share soon?",
-          "What activity sparks joy for kids?",
-          "What makes gatherings more fun?",
-          "What playful thing should adults do more?",
-          "What moment of joy was unexpected?",
-          "What tradition do you hope never ends?",
-          "What role do stories play in joy?",
-          "What memory of joy do you carry?",
-          "What small toy or game brings smiles?",
-          "What joy comes from giving?",
-          "What’s a sound that makes you grin?",
-          "What’s a joy we should create together?",
-          "What joy will you pass forward?"
-        ]
-      }
-    ],
-
-    init() {
-      // Initialize tracking of asked and available questions
-      this.questions.forEach(category => {
-        this.askedQuestions[category.category] = [];
-        this.availableQuestions[category.category] = [...category.questions];
-      });
-      
-      // Calculate total cards
-      this.totalCards = this.questions.reduce((total, category) => total + category.questions.length, 0);
-    },
-
-    flipCard() {
-      if (this.currentCard.question !== "Click next card to begin") {
-        this.cardFlipped = !this.cardFlipped;
-      }
-    },
-
-    selectCategory(category) {
-      this.selectedCategory = this.selectedCategory === category ? null : category;
-    },
-
-    nextCard() {
-      let availableCategories = this.questions;
-      
-      // If a category is selected, filter to only that category
-      if (this.selectedCategory) {
-        availableCategories = this.questions.filter(cat => cat.category === this.selectedCategory);
-      }
-      
-      // Filter categories that still have available questions
-      availableCategories = availableCategories.filter(cat => 
-        this.availableQuestions[cat.category].length > 0
-      );
-      
-      // If no questions are available, show message and return
-      if (availableCategories.length === 0) {
-        this.currentCard = {
-          category: "All Done!",
-          question: "You've answered all available questions in " + 
-                   (this.selectedCategory ? this.selectedCategory : "all categories") + 
-                   ". Reset the game or select a different category."
-        };
-        this.currentCategory = "All Done!";
-        this.cardFlipped = true;
-        return;
-      }
-      
-      // Select a random category from available ones
-      const categoryIndex = Math.floor(Math.random() * availableCategories.length);
-      const category = availableCategories[categoryIndex];
-      
-      // Select a random question from available questions in that category
-      const questionIndex = Math.floor(Math.random() * this.availableQuestions[category.category].length);
-      const question = this.availableQuestions[category.category][questionIndex];
-      
-      // Update asked and available questions
-      this.askedQuestions[category.category].push(question);
-      this.availableQuestions[category.category] = this.availableQuestions[category.category]
-        .filter(q => q !== question);
-      
-      // Add to global asked questions set for random mode
-      this.allAskedQuestions.add(question);
-      
-      this.currentCard = {
-        category: category.category,
-        question: question
-      };
-      
-      this.currentCategory = category.category;
-      this.cardsAnswered++;
-      
-      this.cardFlipped = true;
-    },
-
-    resetGame() {
-      this.cardFlipped = false;
-      this.cardsAnswered = 0;
-      this.selectedCategory = null;
-      this.currentCard = { 
-        question: "Click next card to begin", 
-        category: "Getting Started" 
-      };
-      this.currentCategory = "Getting Started";
-      this.resetTracking();
-    },
-    
-    resetTracking() {
-      // Reset tracking of asked and available questions
-      this.questions.forEach(category => {
-        this.askedQuestions[category.category] = [];
-        this.availableQuestions[category.category] = [...category.questions];
-      });
-      this.allAskedQuestions.clear();
-    },
-    
-    getCategoryProgress(categoryName) {
-      const category = this.questions.find(cat => cat.category === categoryName);
-      if (!category) return { answered: 0, total: 0 };
-      
-      return {
-        answered: this.askedQuestions[categoryName].length,
-        total: category.questions.length
-      };
-    }
-  }
-}
-</script>
-
     <script src="https://michaelsboost.com/TailwindCSSMod/tailwind-mod-noreset.min.js"></script>
     
-    
+    <script src="dist/script.js" ></script>
   </body>
 </html>
